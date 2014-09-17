@@ -3,16 +3,47 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #define GMENU_I_KNOW_THIS_IS_UNSTABLE
 #include <gmenu-tree.h>
 	
 int main() {
 	GMenuTree* tree=gmenu_tree_new("gnome-applications.menu", GMENU_TREE_FLAGS_NONE);
-	while(!gmenu_tree_load_sync(tree,NULL)){
-		usleep(100000);
-	}
+	
 	std::queue<GMenuTreeDirectory*> qu;
+	
+	char lang[128];
+	char* country=0;
+	char* modifier=0;
+	char* enc=0;
+	strcpy(lang,getenv("LANG"));
+	for(int i=0;lang[i];++i){
+		switch(lang[i]){
+			case '_': lang[i]=0; country=lang+i+1; break;
+			case '@': lang[i]=0; modifier=lang+i+1; break;
+			case '.': lang[i]=0; enc=lang+i+1; break;
+		}
+	}
+	
+	char locales[5][128]={"Name","Name","Name","Name","Name"};
+	int loc_i=0;
+	if(*lang&&country&&modifier){
+		strcpy(locales[loc_i++]+4,(std::string("[")+lang+"_"+country+"@"+modifier+"]").c_str());
+	}
+	if(*lang&&country){
+		strcpy(locales[loc_i++]+4,(std::string("[")+lang+"_"+country+"]").c_str());
+	}
+	if(*lang&&modifier){
+		strcpy(locales[loc_i++]+4,(std::string("[")+lang+"@"+modifier+"]").c_str());
+	}
+	if(*lang){
+		strcpy(locales[loc_i++]+4,(std::string("[")+lang+"]").c_str());
+	}
+	
+	while(!gmenu_tree_load_sync(tree,NULL)){
+		usleep(5000);
+	}
 	qu.push(gmenu_tree_get_root_directory(tree));
 	while(!qu.empty()){
 		GMenuTreeDirectory*& dir=qu.front();
@@ -41,7 +72,13 @@ int main() {
 					while((index=exec.find('%'))!=-1){
 						exec.erase(index,2);
 					}
-					printf("+ \"%s\" Exec exec %s\n",g_desktop_app_info_get_string(inf_e,"Name"),exec.c_str());
+					int l_i=0;
+					char* name=0;
+					do{
+						name=g_desktop_app_info_get_string(inf_e,locales[l_i]);
+						++l_i;
+					}while(!name);
+					printf("+ \"%s\" Exec exec %s\n",name,exec.c_str());
 					break;
 			}
 		}
