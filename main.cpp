@@ -1,4 +1,5 @@
 #include <queue>
+#include <string>
 
 #include <stdio.h>
 #include <unistd.h>
@@ -35,8 +36,12 @@ int main() {
 				case GMENU_TREE_ITEM_ENTRY:
 					cur_e=gmenu_tree_iter_get_entry(it);
 					GDesktopAppInfo* inf_e=gmenu_tree_entry_get_app_info(cur_e);
-					//puts(g_desktop_app_info_get_generic_name(inf_e));
-					printf("+ \"%s\" Exec exec %s\n",g_desktop_app_info_get_string(inf_e,"Name"),g_desktop_app_info_get_string(inf_e,"Exec"));
+					std::string exec=g_desktop_app_info_get_string(inf_e,"Exec");
+					int index;
+					while((index=exec.find('%'))!=-1){
+						exec.erase(index,2);
+					}
+					printf("+ \"%s\" Exec exec %s\n",g_desktop_app_info_get_string(inf_e,"Name"),exec.c_str());
 					break;
 			}
 		}
