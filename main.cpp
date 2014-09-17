@@ -26,7 +26,7 @@ int main() {
 		}
 	}
 	
-	char locales[5][128]={"Name","Name","Name","Name","Name"};
+	char locales[6][128]={"Name","Name","Name","Name","Name",0};
 	int loc_i=0;
 	if(*lang&&country&&modifier){
 		strcpy(locales[loc_i++]+4,(std::string("[")+lang+"_"+country+"@"+modifier+"]").c_str());
@@ -77,7 +77,7 @@ int main() {
 					do{
 						name=g_desktop_app_info_get_string(inf_e,locales[l_i]);
 						++l_i;
-					}while(!name);
+					}while(!name&&locales[l_i][0]);
 					printf("+ \"%s\" Exec exec %s\n",name,exec.c_str());
 					break;
 			}
