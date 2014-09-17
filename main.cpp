@@ -100,7 +100,9 @@ int main() {
 						name=g_desktop_app_info_get_string(inf,locales[loc_i]);
 						++loc_i;
 					}while(!name&&locales[loc_i][0]);
-					printf("+ \"%s\" Exec exec %s\n",name,exec.c_str()); //add menu entry
+					if(name){ //if name not empty
+						printf("+ \"%s\" Exec exec %s\n",name,exec.c_str()); //add menu entry
+					}
 					break;
 				}
 				case GMENU_TREE_ITEM_SEPARATOR:{ //add empty menu entry
